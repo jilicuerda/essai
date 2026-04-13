@@ -52,6 +52,7 @@
             pointer-events: none;
             transform: translate(-50%, -50%);
             white-space: nowrap;
+            z-index: 10;
         }
 
         .lab-highlight {
@@ -114,7 +115,6 @@
             z-index: 1000;
         }
 
-        /* Style du message d'erreur */
         #error-msg {
             display: none;
             position: absolute;
@@ -148,12 +148,14 @@
                 Assure-toi d'avoir converti ton PDF en image, de l'avoir renommée exactement <code>map.jpg</code>, et de l'avoir placée dans le même dossier que ce fichier sur GitHub.
             </div>
 
-            <img id="map-image" src="map.jpg" alt="Plan TotalEnergies Pau" onerror="this.style.display='none'; document.getElementById('error-msg').style.display='block';">
+            <img id="map-image" src="map.jpg?v=3" alt="Plan TotalEnergies Pau" onerror="this.style.display='none'; document.getElementById('error-msg').style.display='block';">
             
             <div id="user-dot"></div>
 
-            <div class="label lab-highlight" style="top: 38%; left: 23.5%;">🔬 LABORATOIRE 5</div>
+            <div class="label lab-highlight" style="top: 48%; left: 68%;">🔬 LABORATOIRE 5</div>
+            
             <div class="label lab-highlight" style="top: 55%; left: 16%;">🔬 LABORATOIRE 4</div>
+            
             <div class="label" style="top: 48%; left: 53%;">BÂTIMENT CENTRAL</div>
             <div class="label" style="top: 80%; left: 88%;">ACCÈS AVENUE EUROPE</div>
         </div>
@@ -179,7 +181,6 @@
         function updatePosition(position) {
             const img = document.getElementById('map-image');
             
-            // On ne calcule pas la position si l'image est manquante
             if (img.style.display === 'none') return; 
 
             const lat = position.coords.latitude;
