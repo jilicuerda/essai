@@ -19,19 +19,22 @@
             overflow: hidden; 
         }
 
+        /* Conteneur principal pour le zoom D3 */
         #viewport {
             width: 100vw;
             height: 100vh;
-            overflow: auto;
-            display: flex;
-            align-items: flex-start;
-            justify-content: flex-start;
+            overflow: hidden;
+            position: relative;
             cursor: grab;
         }
 
+        #viewport:active {
+            cursor: grabbing;
+        }
+
         #map-wrapper {
-            position: relative;
-            display: inline-block;
+            position: absolute;
+            transform-origin: 0 0;
         }
 
         #map-image {
@@ -71,7 +74,7 @@
             box-shadow: 0 0 15px rgba(0,123,255,0.8);
             z-index: 999;
             transform: translate(-50%, -50%);
-            transition: all 0.5s ease;
+            transition: background 0.3s ease;
         }
 
         .ui-overlay {
@@ -148,14 +151,12 @@
                 Assure-toi d'avoir converti ton PDF en image, de l'avoir renommée exactement <code>map.jpg</code>, et de l'avoir placée dans le même dossier que ce fichier sur GitHub.
             </div>
 
-            <img id="map-image" src="map.jpg?v=3" alt="Plan TotalEnergies Pau" onerror="this.style.display='none'; document.getElementById('error-msg').style.display='block';">
+            <img id="map-image" src="map.jpg?v=4" alt="Plan TotalEnergies Pau" onerror="this.style.display='none'; document.getElementById('error-msg').style.display='block';">
             
             <div id="user-dot"></div>
 
             <div class="label lab-highlight" style="top: 48%; left: 68%;">🔬 LABORATOIRE 5</div>
-            
             <div class="label lab-highlight" style="top: 55%; left: 16%;">🔬 LABORATOIRE 4</div>
-            
             <div class="label" style="top: 48%; left: 53%;">BÂTIMENT CENTRAL</div>
             <div class="label" style="top: 80%; left: 88%;">ACCÈS AVENUE EUROPE</div>
         </div>
@@ -166,11 +167,15 @@
         <button class="btn" onclick="resetView()">🏠</button>
     </div>
 
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
     <script>
         const dot = document.getElementById('user-dot');
         const wrapper = document.getElementById('map-wrapper');
+        const img = document.getElementById('map-image');
         let watchId = null;
 
+        // Bornes GPS réelles du site
         const bounds = {
             north: 43.3235,
             south: 43.3175,
@@ -178,9 +183,30 @@
             east: -0.3110
         };
 
+        // --- Logique de Zoom (D3.js) ---
+        const zoom = d3.zoom()
+            .scaleExtent([0.3, 4]) // Limites : dézoom à 30%, zoom à 400%
+            .on('zoom', (e) => {
+                d3.select('#map-wrapper').style('transform', `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`);
+            });
+
+        d3.select('#viewport').call(zoom);
+
+        // Centrage de la carte adapté à l'écran
+        function initialCenter() {
+            const w = window.innerWidth;
+            const initialScale = Math.max(w / 1500, 0.4); 
+            d3.select('#viewport').call(zoom.transform, d3.zoomIdentity.translate(0, 50).scale(initialScale));
+        }
+        
+        if(img.complete) { 
+            initialCenter(); 
+        } else { 
+            img.onload = initialCenter; 
+        }
+
+        // --- Logique GPS ---
         function updatePosition(position) {
-            const img = document.getElementById('map-image');
-            
             if (img.style.display === 'none') return; 
 
             const lat = position.coords.latitude;
@@ -195,8 +221,6 @@
             dot.style.display = 'block';
             dot.style.left = x + 'px';
             dot.style.top = y + 'px';
-
-            dot.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
         }
 
         function toggleGPS() {
@@ -219,12 +243,17 @@
         }
 
         function resetView() {
-            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+            const w = window.innerWidth;
+            const initialScale = Math.max(w / 1500, 0.4);
+            d3.select('#viewport')
+              .transition()
+              .duration(750)
+              .call(zoom.transform, d3.zoomIdentity.translate(0, 50).scale(initialScale));
         }
 
-        document.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
+        // Empêche les comportements de zoom par défaut d'iOS/Android
+        document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+        document.addEventListener('dblclick', function(e) { e.preventDefault(); });
     </script>
 </body>
 </html>
