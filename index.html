@@ -21,7 +21,6 @@
         .btn { width: 60px; height: 60px; border-radius: 50%; background: var(--primary); border: none; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn:active { transform: scale(0.9); }
         
-        /* PANNEAU DE DEBUG AJOUTÉ */
         #debug-panel { position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.95); color: #000; padding: 15px; border-radius: 8px; border: 2px solid #ff0000; z-index: 1000; font-family: monospace; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); pointer-events: none; }
     </style>
 </head>
@@ -35,7 +34,7 @@
 
     <div id="viewport">
         <div id="map-wrapper">
-            <img id="map-image" src="map.jpg?v=8" alt="Plan CSTJF" onerror="alert('Image map.jpg introuvable !');">
+            <img id="map-image" src="map.jpg?v=9" alt="Plan CSTJF" onerror="alert('Image map.jpg introuvable !');">
             <div id="user-dot"></div>
             
             <div class="label lab-highlight" style="top: 48%; left: 68%;">🔬 LABO 5</div>
@@ -57,12 +56,12 @@
         const debugLon = document.getElementById('debug-lon');
         let watchId = null;
 
-        // Frontières à calibrer avec tes relevés
+        // Nouvelles frontières calculées grâce à ton point L5
         const bounds = {
-            north: 43.3235,
-            south: 43.3175,
-            west: -0.3190,
-            east: -0.3110
+            north: 43.3226,
+            south: 43.3166,
+            west: -0.3166,
+            east: -0.3076
         };
 
         const zoom = d3.zoom().scaleExtent([0.3, 4]).on('zoom', (e) => {
@@ -75,7 +74,6 @@
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             
-            // Affichage dans le panneau de debug
             debugLat.innerText = lat.toFixed(6);
             debugLon.innerText = lon.toFixed(6);
 
